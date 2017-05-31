@@ -9,6 +9,9 @@ class AbstractCreator(metaclass = abc.ABCMeta):
         self.connect_args = connect_args
         self.session
 
+    ################
+    # add and update
+    #################
     def update(self, new_objects):
         if isinstance(new_objects, (list, tuple)):
             self.session.add_all(new_objects)
@@ -46,4 +49,20 @@ class AbstractCreator(metaclass = abc.ABCMeta):
             queryer = replace_sub.sub(', ', queryer)
         elif options:
             queryer = '{}.filter({})'.format(queryer, options.__str__)
-                
+
+        if isinstance(orders, (list, tuple)):
+            queryer = '{}.order_by('.format(queryer)
+            for od in orders:
+                queryer = '{}{}, '.format(queryer, od)
+            queryer = replace_sub.sub(', ', queryer)
+        elif orders:
+            queryer = '{}.order_by({})'.format(orders.__str__)
+
+        if lines and isinstance(lines, str):
+            res = eval('{}{}'.format(queryer, lines))
+        elif lines:
+            res = eval('{}.all()'.format(queryer))
+        else:
+            res = []
+
+        return res
